@@ -26,6 +26,12 @@ FPS = 30
 
 # --- functions --- (lower_case names)
 
+def current_state(all_sprites):
+    state = {}
+    for piece in all_sprites:
+        state[piece.name] = piece.current_position
+    return state
+
 # --- main ---
 
 # - init -
@@ -47,27 +53,22 @@ all_sprites = pygame.sprite.Group()
 
 
 # initialize board
+
+starting_colour = 'white'
+current_turn = starting_colour
+
 for starting_piece in starting_positions.keys():
     piece,colour = starting_piece.split('_')[:2]
     starting_location = positions[starting_positions[starting_piece]][2]
     starting_position = starting_positions[starting_piece]
     vars()[starting_piece] = vars()[piece.capitalize()](starting_piece,colour,starting_location,starting_position)
 
-    if 'white' in starting_piece:
+    if starting_colour in starting_piece:
         player_1.add(vars()[starting_piece])
     else:
         player_2.add(vars()[starting_piece])
     all_sprites.add(vars()[starting_piece])
 
-
-def current_state(all_sprites):
-    state = {}
-    for piece in all_sprites:
-        state[piece.name] = piece.current_position
-    return state
-
-starting_colour = 'white'
-current_turn = starting_colour
 
 # - mainloop -
 
@@ -95,8 +96,7 @@ while running:
                         mouse_x, mouse_y = event.pos
                         offset_x = piece.rect.x - mouse_x
                         offset_y = piece.rect.y - mouse_y
-                        state = current_state(all_sprites)
-                        print(piece.possible_moves(state))
+
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
@@ -104,24 +104,31 @@ while running:
                     if piece.dragging == True:
 
                         Mouse_x, Mouse_y = pygame.mouse.get_pos()
+                        off_board = True
                         for position in positions.keys():
                             if Mouse_x in range(positions[position][0][0],positions[position][0][1]) and Mouse_y in range(positions[position][1][0],positions[position][1][1]):
-                                can_move = True
-                                for other_piece in all_sprites:
-                                    if other_piece.current_position == position:
-                                        if (piece in player_1 and other_piece in player_1) or (piece in player_2 and other_piece in player_2):
-                                            piece.rect.center = positions[piece.current_position][2]
-                                            can_move = False
-                                        else:
+                                on_board = False
+                                state = current_state(all_sprites)
+                                possible_moves = piece.possible_moves(state)
+                                # if can move ...
+                                if position in possible_moves:
+                                    # ... delete any piece in the new position
+                                    for other_piece in all_sprites:
+                                        if other_piece.current_position == position:
                                             other_piece.kill()
-                                if can_move:
+                                    # move this piece into the center of the new position
                                     piece.rect.center = positions[position][2]
                                     piece.current_position = position
-                                    # change turns on if the player moves
+                                    # change turns if the player moves
                                     if current_turn == 'white':
                                         current_turn = 'black'
                                     else:
                                         current_turn = 'white'
+                                else:
+                                    piece.rect.center = positions[piece.current_position][2]
+                        if off_board:
+                            piece.rect.center = positions[piece.current_position][2]
+
                         piece.dragging = False
 
         elif event.type == pygame.MOUSEMOTION:
