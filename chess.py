@@ -60,6 +60,12 @@ for starting_piece in starting_positions.keys():
     all_sprites.add(vars()[starting_piece])
 
 
+def current_state(all_sprites):
+    state = {}
+    for piece in all_sprites:
+        state[piece.name] = piece.current_position
+    return state
+
 starting_colour = 'white'
 current_turn = starting_colour
 
@@ -89,6 +95,8 @@ while running:
                         mouse_x, mouse_y = event.pos
                         offset_x = piece.rect.x - mouse_x
                         offset_y = piece.rect.y - mouse_y
+                        state = current_state(all_sprites)
+                        print(piece.possible_moves(state))
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
