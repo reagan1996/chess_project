@@ -12,12 +12,6 @@ letter_conversion = {'A':1
                     ,'H':8
                     }
 
-class Background(pygame.sprite.Sprite):
-    def __init__(self, image_file, location):
-        super(Background, self).__init__()  #call Sprite initializer
-        self.image = pygame.image.load(image_file)
-        self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = location
 
 class Piece(pygame.sprite.Sprite):
     def __init__(self, name, piece, colour, starting_location, starting_position):
