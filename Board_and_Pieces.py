@@ -38,8 +38,9 @@ class Pawn(Piece):
 
     def possible_moves(self, current_state):
         possible_moves_clean = []
-        current_position_raw = [letter_conversion[self.current_position[0]],int(self.current_position[1])]
-        
+        current_position = current_state[self.name]
+        current_position_raw = [letter_conversion[current_position[0]],int(current_position[1])]
+                
         if 'white' in self.name:
             forward = [0,1]
         else:
@@ -49,7 +50,7 @@ class Pawn(Piece):
         left =[-1,0]
         directions = [right,left]
 
-        if self.current_position == self.starting_position:
+        if current_position == self.starting_position:
             double_forward = True
         else:
             double_forward = False
@@ -117,7 +118,8 @@ class Rook(Piece):
 
     def possible_moves(self, current_state):
         possible_moves_clean = []
-        current_position_raw = [letter_conversion[self.current_position[0]],int(self.current_position[1])]
+        current_position = current_state[self.name]
+        current_position_raw = [letter_conversion[current_position[0]],int(current_position[1])]
 
         up = [0,1]
         down = [0,-1]
@@ -158,7 +160,8 @@ class Knight(Piece):
 
     def possible_moves(self, current_state):
         possible_moves_clean = []
-        current_position_raw = [letter_conversion[self.current_position[0]],int(self.current_position[1])]
+        current_position = current_state[self.name]
+        current_position_raw = [letter_conversion[current_position[0]],int(current_position[1])]
 
         up_right = [1,2]
         up_left = [-1,2]
@@ -201,7 +204,8 @@ class Bishop(Piece):
 
     def possible_moves(self, current_state):
         possible_moves_clean = []
-        current_position_raw = [letter_conversion[self.current_position[0]],int(self.current_position[1])]
+        current_position = current_state[self.name]
+        current_position_raw = [letter_conversion[current_position[0]],int(current_position[1])]
 
         up_right = [1,1]
         up_left = [-1,1]
@@ -238,7 +242,8 @@ class Queen(Piece):
 
     def possible_moves(self, current_state):
         possible_moves_clean = []
-        current_position_raw = [letter_conversion[self.current_position[0]],int(self.current_position[1])]
+        current_position = current_state[self.name]
+        current_position_raw = [letter_conversion[current_position[0]],int(current_position[1])]
 
         up = [0,1]
         down = [0,-1]
@@ -279,7 +284,8 @@ class King(Piece):
     
     def possible_moves(self, current_state):
         possible_moves_clean = []
-        current_position_raw = [letter_conversion[self.current_position[0]],int(self.current_position[1])]
+        current_position = current_state[self.name]
+        current_position_raw = [letter_conversion[current_position[0]],int(current_position[1])]
 
         up = [0,1]
         down = [0,-1]

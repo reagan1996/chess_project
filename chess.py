@@ -7,6 +7,7 @@
 
 from positions import positions, starting_positions
 from Board_and_Pieces import *
+from Events import *
 
 import pygame
 
@@ -32,6 +33,19 @@ def current_state(all_sprites):
         state[piece.name] = piece.current_position
     return state
 
+def promote_pawn(piece,all_sprites):
+    
+    if piece.colour == 'white':
+        promotion_number = 8
+    else:
+        promotion_number = 1
+
+    name, colour, starting_location, starting_position = [piece.name, piece.colour, piece.rect.center, piece.current_position]
+    if int(piece.current_position[1]) == promotion_number:
+        piece.kill()
+        vars()[piece.name] = Queen(piece.name, piece.colour, piece.rect.center, piece.current_position)
+        all_sprites.add(vars()[piece.name])
+
 # --- main ---
 
 # - init -
@@ -47,15 +61,16 @@ pygame.display.set_caption("Chess")
 BackGround = Background('images/board.png', [0,0])
 
 
+
+# initialize board
+
 player_1 = pygame.sprite.Group()
 player_2 = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 
-
-# initialize board
-
 starting_colour = 'white'
 current_turn = starting_colour
+
 
 for starting_piece in starting_positions.keys():
     piece,colour = starting_piece.split('_')[:2]
@@ -86,16 +101,20 @@ while running:
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                for piece in all_sprites:
+                state = current_state(all_sprites)
+                game_ended = stalemate_or_checkmate(all_sprites,state, current_turn)
+                if game_ended:
+                    print(game_ended)
+                else:
+                    for piece in all_sprites:
+                        if piece.colour != current_turn:
+                            continue
 
-                    if current_turn not in piece.name:
-                        continue
-
-                    if piece.rect.collidepoint(event.pos):
-                        piece.dragging = True
-                        mouse_x, mouse_y = event.pos
-                        offset_x = piece.rect.x - mouse_x
-                        offset_y = piece.rect.y - mouse_y
+                        if piece.rect.collidepoint(event.pos):
+                            piece.dragging = True
+                            mouse_x, mouse_y = event.pos
+                            offset_x = piece.rect.x - mouse_x
+                            offset_y = piece.rect.y - mouse_y
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -112,18 +131,38 @@ while running:
                                 possible_moves = piece.possible_moves(state)
                                 # if can move ...
                                 if position in possible_moves:
-                                    # ... delete any piece in the new position
-                                    for other_piece in all_sprites:
-                                        if other_piece.current_position == position:
-                                            other_piece.kill()
-                                    # move this piece into the center of the new position
-                                    piece.rect.center = positions[position][2]
-                                    piece.current_position = position
-                                    # change turns if the player moves
-                                    if current_turn == 'white':
-                                        current_turn = 'black'
+                                    # .. check if you are in check after move
+                                    new_state = {key:val for key, val in state.items() if val != position}
+                                    new_state[piece.name] = position
+                                    check = in_check(all_sprites,new_state, current_turn)
+                                    # if put in check don't move
+                                    if check:
+                                        print('check')
+                                        piece.rect.center = positions[piece.current_position][2]
                                     else:
-                                        current_turn = 'white'
+                                        # ... delete any piece in the new position
+                                        for other_piece in all_sprites:
+                                            if other_piece.current_position == position:
+                                                other_piece.kill()
+                                        # move this piece into the center of the new position
+                                        piece.rect.center = positions[position][2]
+                                        piece.current_position = position
+                                        # change turns if the player moves
+                                        if current_turn == 'white':
+                                            current_turn = 'black'
+                                        else:
+                                            current_turn = 'white'
+                                        if piece.piece == 'pawn':
+                                                if piece.colour == 'white':
+                                                    promotion_number = 8
+                                                else:
+                                                    promotion_number = 1
+
+                                                name, colour, starting_location, starting_position = [piece.name, piece.colour, piece.rect.center, piece.current_position]
+                                                if int(piece.current_position[1]) == promotion_number:
+                                                    piece.kill()
+                                                    vars()[piece.name] = Queen(piece.name, piece.colour, piece.rect.center, piece.current_position)
+                                                    all_sprites.add(vars()[piece.name])
                                 else:
                                     piece.rect.center = positions[piece.current_position][2]
                         if off_board:
